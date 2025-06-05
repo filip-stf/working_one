@@ -103,5 +103,34 @@ async def round_robin_chat():
                 # pause after 3 messages
                 break
 
+# Dispatch to Streamlit when run via `python rag_memory.py`
 if __name__ == "__main__":
-    asyncio.run(round_robin_chat())
+    import sys
+    from streamlit.web import cli as stcli
+    sys.argv = ["streamlit", "run", sys.argv[0]] + sys.argv[1:]
+    sys.exit(stcli.main())
+
+# Streamlit UI (only when invoked via `streamlit run`)
+import streamlit as st
+
+st.set_page_config(page_title="LOTR Chat", layout="centered")
+st.title("Lord of The Rings Chat")
+
+colors = {
+    "Frodo": "#F4A460",
+    "Gandalf": "#D3D3D3",
+    "Aragorn": "#98FB98",
+    "Legolas": "#90EE90",
+    "Gimli": "#FFD700"
+}
+
+cols = st.columns(len(colors))
+for col, name in zip(cols, colors):
+    with col:
+        st.markdown(
+            f"<div style='width:100px; height:100px; background-color: {colors[name]};'></div>",
+            unsafe_allow_html=True
+        )
+        st.write(name)
+
+st.info("Character selection and chat functionality coming soon.")
