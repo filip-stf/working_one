@@ -84,9 +84,24 @@ async def round_robin_chat():
     text_mention_termination = TextMentionTermination("TERMINATE")
     termination = text_mention_termination
 
-    team = RoundRobinGroupChat(selected, termination_condition=termination)
-    result = await Console(team.run_stream(task="What is Frodo's secret name?"))
-    print(result)
+    # interactive chat loop: recreate RoundRobinGroupChat per input to reset run_stream
+    while True:
+        user_input = input("Enter your question or message (or 'exit' to quit): ").strip()
+        if user_input.lower() == "exit":
+            print("Chat ended.")
+            break
+        if not user_input:
+            print("Please enter a valid message.")
+            continue
+
+        total_messages = 0
+        team = RoundRobinGroupChat(selected, termination_condition=termination)
+        async for msg in team.run_stream(task=user_input):
+            print(msg.content)
+            total_messages += 1
+            if total_messages % 3 == 0:
+                # pause after 3 messages
+                break
 
 if __name__ == "__main__":
     asyncio.run(round_robin_chat())
