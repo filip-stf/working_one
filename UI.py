@@ -38,19 +38,51 @@ try:
     st.markdown(
         f"""
         <style>
-        /* Set background on the root app container */
+        /* Remove default padding and margins */
+        .main .block-container {{
+            padding-top: 1rem !important;
+            padding-bottom: 1rem !important;
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+            max-width: none !important;
+        }}
+        
+        /* Set background on the root app container to cover full page */
         .stApp {{
             background-image: url("data:image/png;base64,{bg_img}");
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
             background-attachment: fixed;
+            height: 100vh !important;
+            width: 100vw !important;
+            margin: 0 !important;
+            padding: 0 !important;
         }}
         
-        /* Ensure all main content stays above background */
+        /* Ensure all main content stays above background and fills page */
         .main {{
             position: relative;
             z-index: 10;
+            height: 100vh !important;
+            width: 100vw !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }}
+        
+        /* Remove default streamlit spacing */
+        .stApp > header {{
+            display: none !important;
+        }}
+        
+        /* Make main container full height */
+        .main .block-container {{
+            height: 100vh !important;
+            padding: 2rem !important;
+            margin: 0 !important;
+            background-color: rgba(255, 255, 255, 0.9) !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
         }}
         
         /* Chat input styling - ensure it's always on top of background */
@@ -96,20 +128,20 @@ try:
             box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.5) !important;
         }}
         
-        /* Make content readable over background */
-        .main .block-container {{
-            background-color: rgba(255, 255, 255, 0.9);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 100px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }}
-        
         h1 {{
             color: #2c3e50;
             text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.9);
             text-align: center;
             margin-bottom: 20px;
+        }}
+        
+        /* Chat messages container styling */
+        .stChatMessage {{
+            background-color: rgba(255, 255, 255, 0.95) !important;
+            border-radius: 15px !important;
+            margin-bottom: 10px !important;
+            padding: 10px !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
         }}
         </style>
         """,
