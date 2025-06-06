@@ -47,6 +47,14 @@ try:
             max-width: none !important;
         }}
         
+        /* Ensure full page coverage without layout shifts */
+        html, body {{
+            height: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow-x: hidden !important;
+        }}
+        
         /* Set background on the root app container to cover full page */
         .stApp {{
             background-image: url("data:image/png;base64,{bg_img}");
@@ -54,18 +62,19 @@ try:
             background-position: center;
             background-repeat: no-repeat;
             background-attachment: fixed;
-            height: 100vh !important;
+            min-height: 100vh !important;
             width: 100vw !important;
             margin: 0 !important;
             padding: 0 !important;
+            position: relative !important;
         }}
         
         /* Ensure all main content stays above background and fills page */
         .main {{
             position: relative;
             z-index: 10;
-            height: 100vh !important;
-            width: 100vw !important;
+            min-height: 100vh !important;
+            width: 100% !important;
             margin: 0 !important;
             padding: 0 !important;
         }}
@@ -75,14 +84,15 @@ try:
             display: none !important;
         }}
         
-        /* Make main container full height */
+        /* Make main container full height with proper spacing for input */
         .main .block-container {{
-            height: 100vh !important;
-            padding: 2rem !important;
+            min-height: 100vh !important;
+            padding: 2rem 2rem 120px 2rem !important;
             margin: 0 !important;
             background-color: rgba(255, 255, 255, 0.9) !important;
             border-radius: 0 !important;
             box-shadow: none !important;
+            box-sizing: border-box !important;
         }}
         
         /* Chat input styling - ensure it's always on top of background */
@@ -101,12 +111,11 @@ try:
         .stChatInput > div {{
             position: relative !important;
             z-index: 999999 !important;
-            background-color: rgba(255, 255, 255, 0.95) !important;
+            background-color: #ffffff !important;
             border-radius: 25px !important;
             padding: 15px 20px !important;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
-            backdrop-filter: blur(10px) !important;
-            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            border: 1px solid rgba(200, 200, 200, 0.5) !important;
         }}
         
         /* Force input field above background */
@@ -142,6 +151,12 @@ try:
             margin-bottom: 10px !important;
             padding: 10px !important;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+            color: #000000 !important;
+        }}
+        
+        /* Force chat message text to be black */
+        .stChatMessage p, .stChatMessage div, .stChatMessage span {{
+            color: #000000 !important;
         }}
         </style>
         """,
@@ -282,7 +297,7 @@ for speaker, message in st.session_state.messages:
                 st.markdown(
                     f"""
                     <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 10px;">
-                        <div style="background-color: #0084ff; color: white; padding: 10px 15px; border-radius: 18px; max-width: 80%; text-align: right; margin-right: 10px;">
+                        <div style="background-color: #ffffff; color: black; padding: 10px 15px; border-radius: 18px; max-width: 80%; text-align: right; margin-right: 10px; border: 1px solid #ddd;">
                             {message}
                         </div>
                         <img src="icons/placeholder.png" style="width: 40px; height: 40px; border-radius: 50%;" />
