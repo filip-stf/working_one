@@ -23,6 +23,15 @@ from autogen_core.memory import MemoryContent
 st.set_page_config(page_title="LOTR RAG Chat", layout="wide")
 st.title("Lord of The Rings RAG Chat")
 
+# map character names to icon paths
+icon_paths = {
+    "frodo": "icons/frodo.png",
+    "gandalf": "icons/gandalf.png",
+    "legolas": "icons/placeholder.png",
+    "sam": "icons/placeholder.png",
+    "placeholder": "icons/placeholder.png",
+}
+
 # Initialize session state
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -135,5 +144,8 @@ if st.session_state.selected_characters:
 
 # Display chat history
 for speaker, message in st.session_state.messages:
-    with st.chat_message(speaker):
+    # select the correct avatar or placeholder
+    avatar_src = icon_paths.get(speaker.lower(), icon_paths["placeholder"])
+    # render chat message with avatar
+    with st.chat_message(speaker, avatar=avatar_src):
         st.write(message)
