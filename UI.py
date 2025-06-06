@@ -87,61 +87,118 @@ try:
         /* Make main container full height with proper spacing for input */
         .main .block-container {{
             min-height: 100vh !important;
-            padding: 2rem 2rem 120px 2rem !important;
+            padding: 0.5rem 2rem 180px 2rem !important;
             margin: 0 !important;
-            background-color: rgba(255, 255, 255, 0.9) !important;
+            background-color: transparent !important;
             border-radius: 0 !important;
             box-shadow: none !important;
             box-sizing: border-box !important;
         }}
         
-        /* Chat input styling - ensure it's always on top of background */
+        /* Chat input window - positioned higher over background */
         .stChatInput {{
             position: fixed !important;
-            bottom: 80px !important;
+            bottom: 20px !important;
             left: 50% !important;
             transform: translateX(-50%) !important;
             width: calc(100% - 40px) !important;
             max-width: 800px !important;
-            z-index: 999999 !important;
-            background-color: transparent !important;
+            z-index: 1000 !important;
         }}
         
-        /* Force chat input container above everything */
+        /* Chat input container styling - white mode with smaller height */
         .stChatInput > div {{
-            position: relative !important;
-            z-index: 999999 !important;
             background-color: #ffffff !important;
-            border-radius: 25px !important;
-            padding: 15px 20px !important;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
-            border: 1px solid rgba(200, 200, 200, 0.5) !important;
-        }}
-        
-        /* Force input field above background */
-        .stChatInput input {{
-            position: relative !important;
-            z-index: 999999 !important;
-            background-color: transparent !important;
-            border: none !important;
-            outline: none !important;
             border-radius: 20px !important;
-            padding: 12px 20px !important;
-            font-size: 16px !important;
-            color: #333 !important;
-            width: 100% !important;
+            padding: 12px 16px !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+            border: 1px solid #e0e0e0 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
         }}
         
-        /* Force input field focus state */
-        .stChatInput input:focus {{
-            box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.5) !important;
+        /* Additional targeting for input container */
+        div[data-testid="stChatInput"] > div,
+        .stChatInput .stChatInputContainer {{
+            background-color: #ffffff !important;
+            border-radius: 20px !important;
+            padding: 12px 16px !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+            border: 1px solid #e0e0e0 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }}
+        
+        /* Input field styling - clean white with smaller height */
+        .stChatInput input,
+        .stChatInput textarea,
+        div[data-testid="stChatInput"] input,
+        div[data-testid="stChatInput"] textarea,
+        .stChatInput div[contenteditable="true"],
+        div[data-testid="stChatInput"] div[contenteditable="true"] {{
+            background-color: #ffffff !important;
+            background: #ffffff !important;
+            border: 1px solid #d0d0d0 !important;
+            border-radius: 15px !important;
+            padding: 10px 16px !important;
+            font-size: 16px !important;
+            color: #333333 !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+            height: 44px !important;
+            min-height: 44px !important;
+            max-height: 44px !important;
+        }}
+        
+        /* Remove any default Streamlit input styling that might cause black sections */
+        .stChatInput * {{
+            background-color: transparent !important;
+        }}
+        
+        .stChatInput input,
+        .stChatInput textarea,
+        div[data-testid="stChatInput"] input,
+        div[data-testid="stChatInput"] textarea {{
+            background-color: #ffffff !important;
+            background: #ffffff !important;
+        }}
+        
+        /* Send button styling - center it */
+        .stChatInput button,
+        div[data-testid="stChatInput"] button {{
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            margin: auto !important;
+            background-color: #4A90E2 !important;
+            border: none !important;
+            border-radius: 50% !important;
+            width: 40px !important;
+            height: 40px !important;
+            color: white !important;
+        }}
+        
+        /* Input field focus state - blue accent */
+        .stChatInput input:focus,
+        .stChatInput textarea:focus,
+        div[data-testid="stChatInput"] input:focus,
+        div[data-testid="stChatInput"] textarea:focus {{
+            outline: none !important;
+            border-color: #4A90E2 !important;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2) !important;
+            background-color: #ffffff !important;
+            background: #ffffff !important;
         }}
         
         h1 {{
             color: #2c3e50;
             text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.9);
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
+            margin-top: 0;
+            padding-top: 0;
         }}
         
         /* Chat messages container styling */
@@ -152,6 +209,13 @@ try:
             padding: 10px !important;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
             color: #000000 !important;
+        }}
+        
+        /* Ensure chat messages area doesn't overlap with input */
+        .main .block-container > div {{
+            max-height: calc(100vh - 140px) !important;
+            overflow-y: auto !important;
+            padding-bottom: 20px !important;
         }}
         
         /* Force chat message text to be black */
