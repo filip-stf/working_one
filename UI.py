@@ -139,7 +139,7 @@ icon_paths = {
     "gandalf": "icons/gandalf.png",
     "legolas": "icons/placeholder.png",
     "sam": "icons/placeholder.png",
-    "You": "👤"  # User icon
+    "You": "icons/placeholder.png"  # User icon
 }
 
 # Display chat history with proper alignment
@@ -153,10 +153,10 @@ for speaker, message in st.session_state.messages:
                 st.markdown(
                     f"""
                     <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 10px;">
-                        <div style="font-size: 24px; margin-right: 10px;">👤</div>
-                        <div style="background-color: #0084ff; color: white; padding: 10px 15px; border-radius: 18px; max-width: 80%; text-align: right;">
+                        <div style="background-color: #0084ff; color: white; padding: 10px 15px; border-radius: 18px; max-width: 80%; text-align: right; margin-right: 10px;">
                             {message}
                         </div>
+                        <img src="icons/placeholder.png" style="width: 40px; height: 40px; border-radius: 50%;" />
                     </div>
                     """,
                     unsafe_allow_html=True
