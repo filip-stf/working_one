@@ -21,6 +21,60 @@ from autogen_core.memory import MemoryContent
 
 # Streamlit UI configuration
 st.set_page_config(page_title="LOTR RAG Chat", layout="wide")
+
+# Add background image styling
+import base64
+
+# Function to encode image to base64
+def get_base64_of_bin_file(bin_file):
+    with open(bin_file, 'rb') as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
+
+# Get base64 string of background image
+try:
+    bg_img = get_base64_of_bin_file("background.png")
+    
+    st.markdown(
+        f"""
+        <style>
+        .stApp {{
+            background-image: url("data:image/png;base64,{bg_img}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }}
+        
+        /* Make content containers slightly transparent to show background */
+        .main .block-container {{
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px;
+            backdrop-filter: blur(5px);
+        }}
+        
+        /* Style the title with better visibility */
+        h1 {{
+            color: #2c3e50;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8);
+            text-align: center;
+        }}
+        
+        /* Style chat messages for better visibility */
+        .stChatMessage {{
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            backdrop-filter: blur(3px);
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+except FileNotFoundError:
+    st.warning("Background image not found. Using default background.")
+
 st.title("Lord of The Rings RAG Chat")
 
 # Initialize session state
