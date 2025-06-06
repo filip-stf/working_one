@@ -3,3 +3,6 @@ autogen-core
 autogen-ext
 openai
 tiktoken
+python-dotenv
+autogen-ext[openai,azure]
+ag2[retrievechat]
