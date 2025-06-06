@@ -31,13 +31,14 @@ def get_base64_of_bin_file(bin_file):
         data = f.read()
     return base64.b64encode(data).decode()
 
-# Get base64 string of background image
+# Simple background with working chat input
 try:
     bg_img = get_base64_of_bin_file("background.png")
     
     st.markdown(
         f"""
         <style>
+        /* Set background on the root app container */
         .stApp {{
             background-image: url("data:image/png;base64,{bg_img}");
             background-size: cover;
@@ -46,27 +47,69 @@ try:
             background-attachment: fixed;
         }}
         
-        /* Make content containers slightly transparent to show background */
+        /* Ensure all main content stays above background */
+        .main {{
+            position: relative;
+            z-index: 10;
+        }}
+        
+        /* Chat input styling - ensure it's always on top of background */
+        .stChatInput {{
+            position: fixed !important;
+            bottom: 80px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            width: calc(100% - 40px) !important;
+            max-width: 800px !important;
+            z-index: 999999 !important;
+            background-color: transparent !important;
+        }}
+        
+        /* Force chat input container above everything */
+        .stChatInput > div {{
+            position: relative !important;
+            z-index: 999999 !important;
+            background-color: rgba(255, 255, 255, 0.95) !important;
+            border-radius: 25px !important;
+            padding: 15px 20px !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+            backdrop-filter: blur(10px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        }}
+        
+        /* Force input field above background */
+        .stChatInput input {{
+            position: relative !important;
+            z-index: 999999 !important;
+            background-color: transparent !important;
+            border: none !important;
+            outline: none !important;
+            border-radius: 20px !important;
+            padding: 12px 20px !important;
+            font-size: 16px !important;
+            color: #333 !important;
+            width: 100% !important;
+        }}
+        
+        /* Force input field focus state */
+        .stChatInput input:focus {{
+            box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.5) !important;
+        }}
+        
+        /* Make content readable over background */
         .main .block-container {{
             background-color: rgba(255, 255, 255, 0.9);
-            border-radius: 10px;
+            border-radius: 15px;
             padding: 20px;
-            margin: 10px;
-            backdrop-filter: blur(5px);
+            margin-bottom: 100px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }}
         
-        /* Style the title with better visibility */
         h1 {{
             color: #2c3e50;
-            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8);
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.9);
             text-align: center;
-        }}
-        
-        /* Style chat messages for better visibility */
-        .stChatMessage {{
-            background-color: rgba(255, 255, 255, 0.8);
-            border-radius: 10px;
-            backdrop-filter: blur(3px);
+            margin-bottom: 20px;
         }}
         </style>
         """,
