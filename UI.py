@@ -1,0 +1,139 @@
+import streamlit as st
+import os
+import sys
+import asyncio
+from pathlib import Path
+
+# Ensure workspace root is in path to import rag_memory
+sys.path.append(str(Path(__file__).resolve().parents[0]))
+
+from dotenv import load_dotenv
+load_dotenv()
+
+import rag_memory
+from rag_memory import index_docs, base_chroma_path
+from autogen_ext.memory.chromadb import ChromaDBVectorMemory, PersistentChromaDBVectorMemoryConfig
+from autogen_agentchat.agents import AssistantAgent
+from autogen_agentchat.teams import RoundRobinGroupChat
+from autogen_agentchat.conditions import TextMentionTermination, MaxMessageTermination
+from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
+from autogen_core.memory import MemoryContent
+
+# Streamlit UI configuration
+st.set_page_config(page_title="LOTR RAG Chat", layout="wide")
+st.title("Lord of The Rings RAG Chat")
+
+# Initialize session state
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+if "selected_characters" not in st.session_state:
+    st.session_state.selected_characters = None
+
+# Character selection
+if st.session_state.selected_characters is None:
+    st.subheader("Select Characters")
+    st.write("Available characters: Frodo, Gandalf, Legolas, Sam")
+    chars = st.text_input("Enter 1 or 2 character names (comma separated):")
+    if st.button("Start Chat") and chars:
+        names = [n.strip().lower() for n in chars.split(",") if n.strip()]
+        valid = ["frodo", "gandalf", "legolas", "sam"]
+        if 1 <= len(names) <= 2 and all(n in valid for n in names):
+            st.session_state.selected_characters = names
+            st.rerun()
+        else:
+            st.error("Invalid selection. Please enter one or two valid character names.")
+else:
+    st.write(f"Chatting with: {', '.join(st.session_state.selected_characters).title()}")
+    if st.button("Reset"):  # reset selection
+        st.session_state.selected_characters = None
+        st.session_state.messages = []
+        st.rerun()
+
+# Helper to prepare and index memories
+async def prepare_memories():
+    configs = {
+        "frodo": ["Final/frodo_lore.txt", "Final/frodo_pages.txt", "Final/frodo_wikipedia_info.txt", "Final/LOTR_full.txt"],
+        "gandalf": ["Final/gandalf_lore.txt", "Final/gandalf_pages.txt", "Final/gandalf_wikipedia_info.txt", "Final/LOTR_full.txt"],
+        "legolas": ["Final/legolas_lore.txt", "Final/legolas_pages.txt", "Final/legolas_wikipedia_info.txt", "Final/LOTR_full.txt"],
+        "sam": ["Final/sam_lore.txt", "Final/sam_pages.txt", "Final/sam_wikipedia_info.txt", "Final/LOTR_full.txt"],
+    }
+    memories = {}
+    for name, sources in configs.items():
+        path = os.path.join(base_chroma_path, name)
+        mem = ChromaDBVectorMemory(
+            config=PersistentChromaDBVectorMemoryConfig(
+                collection_name=f"{name}_docs",
+                persistence_path=path,
+                k=3,
+                score_threshold=0.4
+            )
+        )
+        if not os.path.exists(path):
+            await mem.clear()
+            await index_docs(sources, mem, name.title())
+        memories[name] = mem
+    return memories
+
+# Run chat with selected agents
+async def run_chat(user_input, selected_names):
+    # Prepare vector memories
+    memories = await prepare_memories()
+    # Create Azure client
+    client = AzureOpenAIChatCompletionClient(
+        azure_deployment="gpt-4o",
+        model="gpt-4o",
+        api_version="2025-01-01-preview",
+        azure_endpoint=os.getenv("AZURE_ENDPOINT"),
+        api_key=os.getenv("AZURE_OPENAI_KEY"),
+    )
+    # Instantiate agents
+    agents = []
+    for name in selected_names:
+        mem = memories[name]
+        agent = AssistantAgent(
+            name=name.title(),
+            model_client=client,
+            system_message=f"You are {name.title()} from Lord of The Rings",
+            memory=[mem]
+        )
+        agents.append(agent)
+    # Setup termination condition
+    termination = TextMentionTermination("TERMINATE") | MaxMessageTermination(max_messages=5)
+    team = RoundRobinGroupChat(agents, termination_condition=termination)
+    # Run and collect responses
+    responses = []
+    async for msg in team.run_stream(task=user_input):
+        speaker = getattr(msg, 'source', '').lower()
+        # only show messages from chosen characters
+        if speaker not in st.session_state.selected_characters:
+            continue
+        raw = getattr(msg, 'content', msg)
+        # skip memory retrieval artifacts or lists
+        if isinstance(raw, MemoryContent) or isinstance(raw, list):
+            continue
+        # use actual text
+        content = str(raw)
+        responses.append((speaker, content))
+        if len(responses) >= 3:
+            break
+    return responses
+
+# Chat interaction
+if st.session_state.selected_characters:
+    prompt = st.chat_input("Your message")
+    if prompt:
+        st.session_state.messages.append(("You", prompt))
+        try:
+            # run coroutine on a new event loop to avoid asyncio.run shutdown issues
+            loop = asyncio.new_event_loop()
+            replies = loop.run_until_complete(run_chat(prompt, st.session_state.selected_characters))
+            loop.close()
+            for speaker, text in replies:
+                st.session_state.messages.append((speaker, text))
+        except Exception as e:
+            st.error(f"Chat error: {e}")
+
+# Display chat history
+for speaker, message in st.session_state.messages:
+    with st.chat_message(speaker):
+        st.write(message)
