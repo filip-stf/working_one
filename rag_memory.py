@@ -138,9 +138,9 @@ async def round_robin_chat():
         memory=[legolas_memory]
     )
     sam = AssistantAgent(
-        name="Gimli",
+        name="Sam",
         model_client=az_model_client,
-        system_message="You are Gimli from Lord of The Rings",
+        system_message="You are Sam from Lord of The Rings",
         memory=[sam_memory]
     )
     
