@@ -23,15 +23,6 @@ from autogen_core.memory import MemoryContent
 st.set_page_config(page_title="LOTR RAG Chat", layout="wide")
 st.title("Lord of The Rings RAG Chat")
 
-# map character names to icon paths
-icon_paths = {
-    "frodo": "icons/frodo.png",
-    "gandalf": "icons/gandalf.png",
-    "legolas": "icons/placeholder.png",
-    "sam": "icons/placeholder.png",
-    "placeholder": "icons/placeholder.png",
-}
-
 # Initialize session state
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -142,10 +133,42 @@ if st.session_state.selected_characters:
         except Exception as e:
             st.error(f"Chat error: {e}")
 
-# Display chat history
+# Icon mapping for characters
+icon_paths = {
+    "frodo": "icons/frodo.png",
+    "gandalf": "icons/gandalf.png",
+    "legolas": "icons/placeholder.png",
+    "sam": "icons/placeholder.png",
+    "You": "👤"  # User icon
+}
+
+# Display chat history with proper alignment
 for speaker, message in st.session_state.messages:
-    # select the correct avatar or placeholder
-    avatar_src = icon_paths.get(speaker.lower(), icon_paths["placeholder"])
-    # render chat message with avatar
-    with st.chat_message(speaker, avatar=avatar_src):
-        st.write(message)
+    if speaker == "You":
+        # Right-align user messages with icon on the left of the message
+        col1, col2, col3 = st.columns([1, 3, 1])
+        with col3:
+            # Create a container for right-aligned content
+            with st.container():
+                st.markdown(
+                    f"""
+                    <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 10px;">
+                        <div style="font-size: 24px; margin-right: 10px;">👤</div>
+                        <div style="background-color: #0084ff; color: white; padding: 10px 15px; border-radius: 18px; max-width: 80%; text-align: right;">
+                            {message}
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+    else:
+        # Left-align character messages (default)
+        icon = icon_paths.get(speaker.lower(), "🧙‍♂️")
+        if icon.endswith('.png'):
+            # For image icons, use standard chat message
+            with st.chat_message(speaker, avatar=icon):
+                st.write(message)
+        else:
+            # For emoji icons
+            with st.chat_message(speaker, avatar=icon):
+                st.write(message)
