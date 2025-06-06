@@ -6,3 +6,5 @@ tiktoken
 python-dotenv
 autogen-ext[openai,azure]
 ag2[retrievechat]
+aiohttp
+pysqlite3-binary
