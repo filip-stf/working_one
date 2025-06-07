@@ -22,212 +22,26 @@ from autogen_core.memory import MemoryContent
 # Streamlit UI configuration
 st.set_page_config(page_title="LOTR RAG Chat", layout="wide")
 
-# Add background image styling
-import base64
+# --- MOVE CHAT INPUT TO TOP OF PAGE ---
+user_msg = None
+user_input_pending = False
+# Define callback to queue and clear user input
+def queue_message():
+    user_input = st.session_state.user_input
+    if user_input:
+        st.session_state.messages.append(("You", user_input))
+        st.session_state._pending_user_msg = user_input
+        st.session_state.user_input = ""
 
-# Function to encode image to base64
-def get_base64_of_bin_file(bin_file):
-    with open(bin_file, 'rb') as f:
-        data = f.read()
-    return base64.b64encode(data).decode()
-
-# Simple background with working chat input
-try:
-    bg_img = get_base64_of_bin_file("background.png")
-    
-    st.markdown(
-        f"""
-        <style>
-        /* Remove default padding and margins */
-        .main .block-container {{
-            padding-top: 1rem !important;
-            padding-bottom: 1rem !important;
-            padding-left: 1rem !important;
-            padding-right: 1rem !important;
-            max-width: none !important;
-        }}
-        
-        /* Ensure full page coverage without layout shifts */
-        html, body {{
-            height: 100% !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            overflow-x: hidden !important;
-        }}
-        
-        /* Set background on the root app container to cover full page */
-        .stApp {{
-            background-image: url("data:image/png;base64,{bg_img}");
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            min-height: 100vh !important;
-            width: 100vw !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            position: relative !important;
-        }}
-        
-        /* Ensure all main content stays above background and fills page */
-        .main {{
-            position: relative;
-            z-index: 10;
-            min-height: 100vh !important;
-            width: 100% !important;
-            margin: 0 !important;
-            padding: 0 !important;
-        }}
-        
-        /* Remove default streamlit spacing */
-        .stApp > header {{
-            display: none !important;
-        }}
-        
-        /* Make main container full height with proper spacing for input */
-        .main .block-container {{
-            min-height: 100vh !important;
-            padding: 0.5rem 2rem 180px 2rem !important;
-            margin: 0 !important;
-            background-color: transparent !important;
-            border-radius: 0 !important;
-            box-shadow: none !important;
-            box-sizing: border-box !important;
-        }}
-        
-        /* Chat input window - positioned higher over background */
-        .stChatInput {{
-            position: fixed !important;
-            bottom: 20px !important;
-            left: 50% !important;
-            transform: translateX(-50%) !important;
-            width: calc(100% - 40px) !important;
-            max-width: 800px !important;
-            z-index: 1000 !important;
-        }}
-        
-        /* Chat input container styling - white mode with smaller height */
-        .stChatInput > div {{
-            background-color: #ffffff !important;
-            border-radius: 20px !important;
-            padding: 12px 16px !important;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
-            border: 1px solid #e0e0e0 !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-        }}
-        
-        /* Additional targeting for input container */
-        div[data-testid="stChatInput"] > div,
-        .stChatInput .stChatInputContainer {{
-            background-color: #ffffff !important;
-            border-radius: 20px !important;
-            padding: 12px 16px !important;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
-            border: 1px solid #e0e0e0 !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-        }}
-        
-        /* Input field styling - clean white with smaller height */
-        .stChatInput input,
-        .stChatInput textarea,
-        div[data-testid="stChatInput"] input,
-        div[data-testid="stChatInput"] textarea,
-        .stChatInput div[contenteditable="true"],
-        div[data-testid="stChatInput"] div[contenteditable="true"] {{
-            background-color: #ffffff !important;
-            background: #ffffff !important;
-            border: 1px solid #d0d0d0 !important;
-            border-radius: 15px !important;
-            padding: 10px 16px !important;
-            font-size: 16px !important;
-            color: #333333 !important;
-            width: 100% !important;
-            box-sizing: border-box !important;
-            height: 44px !important;
-            min-height: 44px !important;
-            max-height: 44px !important;
-        }}
-        
-        /* Remove any default Streamlit input styling that might cause black sections */
-        .stChatInput * {{
-            background-color: transparent !important;
-        }}
-        
-        .stChatInput input,
-        .stChatInput textarea,
-        div[data-testid="stChatInput"] input,
-        div[data-testid="stChatInput"] textarea {{
-            background-color: #ffffff !important;
-            background: #ffffff !important;
-        }}
-        
-        /* Send button styling - center it */
-        .stChatInput button,
-        div[data-testid="stChatInput"] button {{
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            margin: auto !important;
-            background-color: #4A90E2 !important;
-            border: none !important;
-            border-radius: 50% !important;
-            width: 40px !important;
-            height: 40px !important;
-            color: white !important;
-        }}
-        
-        /* Input field focus state - blue accent */
-        .stChatInput input:focus,
-        .stChatInput textarea:focus,
-        div[data-testid="stChatInput"] input:focus,
-        div[data-testid="stChatInput"] textarea:focus {{
-            outline: none !important;
-            border-color: #4A90E2 !important;
-            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2) !important;
-            background-color: #ffffff !important;
-            background: #ffffff !important;
-        }}
-        
-        h1 {{
-            color: #2c3e50;
-            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.9);
-            text-align: center;
-            margin-bottom: 10px;
-            margin-top: 0;
-            padding-top: 0;
-        }}
-        
-        /* Chat messages container styling */
-        .stChatMessage {{
-            background-color: rgba(255, 255, 255, 0.95) !important;
-            border-radius: 15px !important;
-            margin-bottom: 10px !important;
-            padding: 10px !important;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
-            color: #000000 !important;
-        }}
-        
-        /* Ensure chat messages area doesn't overlap with input */
-        .main .block-container > div {{
-            max-height: calc(100vh - 140px) !important;
-            overflow-y: auto !important;
-            padding-bottom: 20px !important;
-        }}
-        
-        /* Force chat message text to be black */
-        .stChatMessage p, .stChatMessage div, .stChatMessage span {{
-            color: #000000 !important;
-        }}
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-except FileNotFoundError:
-    st.warning("Background image not found. Using default background.")
+# Chat interaction: use text_input with on_change callback
+if "selected_characters" in st.session_state and st.session_state.selected_characters:
+    # Input and send button side by side
+    col1, col2 = st.columns([8, 1])
+    with col1:
+        st.text_input("", key="user_input", placeholder="Type your message here…", on_change=queue_message)
+    with col2:
+        st.button("Send", on_click=queue_message, key="send_button")
+# --- END CHAT INPUT AT TOP ---
 
 st.title("Lord of The Rings RAG Chat")
 
@@ -326,20 +140,107 @@ async def run_chat(user_input, selected_names):
             break
     return responses
 
-# Chat interaction
-if st.session_state.selected_characters:
-    prompt = st.chat_input("Your message")
-    if prompt:
-        st.session_state.messages.append(("You", prompt))
-        try:
-            # run coroutine on a new event loop to avoid asyncio.run shutdown issues
-            loop = asyncio.new_event_loop()
-            replies = loop.run_until_complete(run_chat(prompt, st.session_state.selected_characters))
-            loop.close()
-            for speaker, text in replies:
-                st.session_state.messages.append((speaker, text))
-        except Exception as e:
-            st.error(f"Chat error: {e}")
+# Add background image styling (after input box)
+import base64
+
+def get_base64_of_bin_file(bin_file):
+    with open(bin_file, 'rb') as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
+
+try:
+    bg_img = get_base64_of_bin_file("background.png")
+    st.markdown(
+        f"""
+        <style>
+        html, body, .stApp {{
+            height: 100vh !important;
+            min-height: 100vh !important;
+            width: 100vw !important;
+            min-width: 100vw !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background-image: url('data:image/png;base64,{bg_img}') !important;
+            background-size: cover !important;
+            background-position: center center !important;
+            background-repeat: no-repeat !important;
+            background-attachment: fixed !important;
+        }}
+        .stApp {{
+            background: transparent !important;
+        }}
+        
+        /* Ensure all main content stays above background and fills page */
+        .main {{
+            position: relative;
+            z-index: 10;
+            min-height: 100vh !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }}
+        
+        /* Remove default streamlit spacing */
+        .stApp > header {{
+            display: none !important;
+        }}
+        
+        /* Make main container full height with basic spacing */
+        .main .block-container {{
+            min-height: 100vh !important;
+            padding: 0.5rem 2rem 2rem 2rem !important;
+            margin: 0 !important;
+            background-color: transparent !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            box-sizing: border-box !important;
+        }}
+        
+        h1 {{
+            color: #2c3e50;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.9);
+            text-align: center;
+            margin-bottom: 10px;
+            margin-top: 0;
+            padding-top: 0;
+        }}
+        
+        /* Chat messages container styling */
+        .stChatMessage {{
+            background-color: rgba(255, 255, 255, 0.95) !important;
+            border-radius: 15px !important;
+            margin-bottom: 10px !important;
+            padding: 10px !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+            color: #000000 !important;
+        }}
+        
+        /* Force chat message text to be black */
+        .stChatMessage p, .stChatMessage div, .stChatMessage span {{
+            color: #000000 !important;
+        }}
+        
+        /* Float text input box at bottom of screen */
+        div[data-testid="stTextInput"] {{
+            position: fixed !important;
+            bottom: 20px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            width: 100% !important;
+            max-width: 800px !important;
+            z-index: 1000 !important;
+        }}
+        /* Make the input field background white */
+        div[data-testid="stTextInput"] input {{
+            background-color: #ffffff !important;
+            color: #000000 !important;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+except FileNotFoundError:
+    st.warning("Background image not found. Using default background.")
 
 # Icon mapping for characters
 icon_paths = {
@@ -349,6 +250,18 @@ icon_paths = {
     "sam": "icons/placeholder.png",
     "You": "icons/placeholder.png"  # User icon
 }
+
+# After run_chat is defined and before displaying chat history:
+if hasattr(st.session_state, '_pending_user_msg') and st.session_state._pending_user_msg:
+    try:
+        loop = asyncio.new_event_loop()
+        replies = loop.run_until_complete(run_chat(st.session_state._pending_user_msg, st.session_state.selected_characters))
+        loop.close()
+        for speaker, text in replies:
+            st.session_state.messages.append((speaker, text))
+    except Exception as e:
+        st.error(f"Chat error: {e}")
+    st.session_state._pending_user_msg = None
 
 # Display chat history with proper alignment
 for speaker, message in st.session_state.messages:
