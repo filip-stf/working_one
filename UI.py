@@ -35,12 +35,8 @@ def queue_message():
 
 # Chat interaction: use text_input with on_change callback
 if "selected_characters" in st.session_state and st.session_state.selected_characters:
-    # Input and send button side by side
-    col1, col2 = st.columns([8, 1])
-    with col1:
-        st.text_input("", key="user_input", placeholder="Type your message here…", on_change=queue_message)
-    with col2:
-        st.button("Send", on_click=queue_message, key="send_button")
+    # Only text input at bottom
+    st.text_input("Type your message here…", key="user_input", placeholder="Type your message here…", on_change=queue_message)
 # --- END CHAT INPUT AT TOP ---
 
 st.title("Lord of The Rings RAG Chat")
@@ -50,6 +46,42 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 if "selected_characters" not in st.session_state:
     st.session_state.selected_characters = None
+
+# Manage multiple chat sessions
+if "chat_sessions" not in st.session_state:
+    st.session_state.chat_sessions = {}
+    st.session_state.current_session = None
+
+# Sidebar: session selection and creation
+with st.sidebar:
+    st.header("Chat Sessions")
+    # Button to create a new chat session
+    if st.button("New Chat", key="new_chat_btn"):
+        new_name = f"Chat {len(st.session_state.chat_sessions) + 1}"
+        st.session_state.chat_sessions[new_name] = {"messages": [], "selected_characters": None}
+        st.session_state.current_session = new_name
+        # reset main session state
+        st.session_state.messages = []
+        st.session_state.selected_characters = None
+        st.rerun()
+    # Dropdown to select existing sessions
+    session_names = list(st.session_state.chat_sessions.keys())
+    if session_names:
+        default_index = session_names.index(st.session_state.current_session) if st.session_state.current_session in session_names else 0
+        selection = st.selectbox("Select session", session_names, index=default_index, key="session_select")
+        if st.session_state.current_session != selection:
+            st.session_state.current_session = selection
+            data = st.session_state.chat_sessions.get(selection, {})
+            st.session_state.messages = data.get("messages", [])
+            st.session_state.selected_characters = data.get("selected_characters", None)
+    # Reset current session
+    if st.session_state.current_session:
+        if st.button("Reset Chat", key="reset_session"):
+            st.session_state.chat_sessions[st.session_state.current_session]["messages"] = []
+            st.session_state.chat_sessions[st.session_state.current_session]["selected_characters"] = None
+            st.session_state.messages = []
+            st.session_state.selected_characters = None
+            st.rerun()
 
 # Character selection
 if st.session_state.selected_characters is None:
@@ -66,10 +98,6 @@ if st.session_state.selected_characters is None:
             st.error("Invalid selection. Please enter one or two valid character names.")
 else:
     st.write(f"Chatting with: {', '.join(st.session_state.selected_characters).title()}")
-    if st.button("Reset"):  # reset selection
-        st.session_state.selected_characters = None
-        st.session_state.messages = []
-        st.rerun()
 
 # Helper to prepare and index memories
 async def prepare_memories():
@@ -235,6 +263,13 @@ try:
             background-color: #ffffff !important;
             color: #000000 !important;
         }}
+        /* Sidebar translucent background */
+        aside[data-testid="stSidebar"] > div[data-testid="stSidebarContent"] {{
+            background-color: rgba(255, 255, 255, 0.5) !important;
+            backdrop-filter: blur(5px) !important;
+            border-radius: 10px !important;
+            padding: 1rem !important;
+        }}
         </style>
         """,
         unsafe_allow_html=True
@@ -263,6 +298,12 @@ if hasattr(st.session_state, '_pending_user_msg') and st.session_state._pending_
         st.error(f"Chat error: {e}")
     st.session_state._pending_user_msg = None
 
+# Persist current session data after processing messages
+if st.session_state.current_session:
+    st.session_state.chat_sessions[st.session_state.current_session] = {
+        "messages": st.session_state.messages,
+        "selected_characters": st.session_state.selected_characters
+    }
 # Display chat history with proper alignment
 for speaker, message in st.session_state.messages:
     if speaker == "You":
