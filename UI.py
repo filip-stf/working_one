@@ -85,17 +85,50 @@ with st.sidebar:
 
 # Character selection
 if st.session_state.selected_characters is None:
-    st.subheader("Select Characters")
-    st.write("Available characters: Frodo, Gandalf, Legolas, Sam")
-    chars = st.text_input("Enter 1 or 2 character names (comma separated):")
-    if st.button("Start Chat") and chars:
-        names = [n.strip().lower() for n in chars.split(",") if n.strip()]
-        valid = ["frodo", "gandalf", "legolas", "sam"]
-        if 1 <= len(names) <= 2 and all(n in valid for n in names):
-            st.session_state.selected_characters = names
+    # Centered rectangular icon selection for characters
+    icons = {
+        "frodo": "icons/frodo.png",
+        "gandalf": "icons/gandalf.png",
+        "legolas": "icons/placeholder.png",
+        "sam": "icons/placeholder.png"
+    }
+    # Begin character selection header
+    st.markdown("""
+    <div id="char-selection" style="text-align:center; width:60%; margin:40px auto 10px;">
+        <h3>Select Characters</h3>
+    </div>
+    """, unsafe_allow_html=True)
+    # Create aligned columns for icons and checkboxes
+    col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
+    with col1:
+        st.image("icons/frodo.png", width=60)
+        st.checkbox("Frodo", key="select_frodo")
+    with col2:
+        st.image("icons/gandalf.png", width=60)
+        st.checkbox("Gandalf", key="select_gandalf")
+    with col3:
+        st.image("icons/placeholder.png", width=60)
+        st.checkbox("Legolas", key="select_legolas")
+    with col4:
+        st.image("icons/placeholder.png", width=60)
+        st.checkbox("Sam", key="select_sam")
+    # Start chat button
+    if st.button("Start Chat", key="start_chat_btn"):
+        selected = []
+        if st.session_state.get("select_frodo"):
+            selected.append("frodo")
+        if st.session_state.get("select_gandalf"):
+            selected.append("gandalf")
+        if st.session_state.get("select_legolas"):
+            selected.append("legolas")
+        if st.session_state.get("select_sam"):
+            selected.append("sam")
+        if 1 <= len(selected) <= 2:
+            st.session_state.selected_characters = selected
             st.rerun()
         else:
-            st.error("Invalid selection. Please enter one or two valid character names.")
+            st.error("Please select one or two characters before starting.")
+    # End character selection
 else:
     st.write(f"Chatting with: {', '.join(st.session_state.selected_characters).title()}")
 
@@ -197,7 +230,6 @@ try:
         .stApp {{
             background: transparent !important;
         }}
-        
         /* Ensure all main content stays above background and fills page */
         .main {{
             position: relative;
@@ -207,12 +239,10 @@ try:
             margin: 0 !important;
             padding: 0 !important;
         }}
-        
         /* Remove default streamlit spacing */
         .stApp > header {{
             display: none !important;
         }}
-        
         /* Make main container full height with basic spacing */
         .main .block-container {{
             min-height: 100vh !important;
@@ -223,7 +253,6 @@ try:
             box-shadow: none !important;
             box-sizing: border-box !important;
         }}
-        
         h1 {{
             color: #2c3e50;
             text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.9);
@@ -232,7 +261,6 @@ try:
             margin-top: 0;
             padding-top: 0;
         }}
-        
         /* Chat messages container styling */
         .stChatMessage {{
             background-color: rgba(255, 255, 255, 0.95) !important;
@@ -242,12 +270,10 @@ try:
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
             color: #000000 !important;
         }}
-        
         /* Force chat message text to be black */
         .stChatMessage p, .stChatMessage div, .stChatMessage span {{
             color: #000000 !important;
         }}
-        
         /* Float text input box at bottom of screen */
         div[data-testid="stTextInput"] {{
             position: fixed !important;
@@ -269,6 +295,54 @@ try:
             backdrop-filter: blur(5px) !important;
             border-radius: 10px !important;
             padding: 1rem !important;
+        }}
+        /* Character icon selection wrapper styling */
+        #char-selection-wrapper {{
+            position: relative !important;
+            height: auto !important;
+            margin: 20px auto 40px !important;
+            width: 60% !important;
+            background-color: rgba(255,255,255,0.8) !important;
+            border: 2px solid rgba(0,0,0,0.2) !important;
+            border-radius: 10px !important;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+            padding: 20px 0 10px 0 !important;
+            z-index: 1 !important;
+        }}
+        /* Character icon selection spacing */
+        #char-selection-wrapper > div[data-testid="column"] {{
+            padding: 0 !important;
+            margin: 0 !important;
+            position: static !important;
+            z-index: auto !important;
+        }}
+        #char-selection img {{
+            margin: 0 auto 2px !important;
+            display: block !important;
+        }}
+        #char-selection .stCheckbox {{
+            margin: 0 !important;
+            padding: 0 !important;
+            text-align: center !important;
+        }}
+        /* Reduce space above checkbox labels */
+        #char-selection label {{
+            margin-top: 2px !important;
+            margin-bottom: 0 !important;
+        }}
+        #char-selection .stCheckbox > label {{
+            margin: 0 !important;
+            text-align: center !important;
+            display: block !important;
+            justify-content: center !important;
+        }}
+        #char-selection .stCheckbox input[type="checkbox"] {{
+            margin: 0 auto !important;
+        }}
+        /* Remove Streamlit's default spacing above checkboxes */
+        #char-selection .stCheckbox > div {{
+            margin-top: 0 !important;
+            padding-top: 0 !important;
         }}
         </style>
         """,
