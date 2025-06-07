@@ -34,10 +34,31 @@ def get_base64_of_bin_file(bin_file):
 # Simple background with working chat input
 try:
     bg_img = get_base64_of_bin_file("background.png")
-    
     st.markdown(
         f"""
         <style>
+        /* Import Google Font */
+        @import url('https://fonts.googleapis.com/css2?family=Tangerine:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Lugrasimo&family=Tangerine:wght@400;700&display=swap');
+          /* Apply Font Family to all elements */
+        html, body, .stApp, p, div, h4, h5, h6, button, input, textarea, .stMarkdown, .stText {{
+            font-family: "Lugrasimo", cursive;
+            font-size: 20px !important;
+        }}
+        
+        /* Special styling for headers */
+        h1 {{
+            font-family: "Tangerine", cursive !important;
+            font-size: 60px !important;
+            font-weight: 700 !important;
+        }}
+        
+        h2, h3 {{
+            font-family: "Tangerine", cursive !important;
+            font-size: 42px !important;
+            font-weight: 700 !important;
+        }}
+        
         /* Remove default padding and margins */
         .main .block-container {{
             padding-top: 1rem !important;
@@ -130,8 +151,7 @@ try:
             align-items: center !important;
             justify-content: center !important;
         }}
-        
-        /* Input field styling - clean white with smaller height */
+          /* Input field styling - clean white with smaller height */
         .stChatInput input,
         .stChatInput textarea,
         div[data-testid="stChatInput"] input,
@@ -143,7 +163,7 @@ try:
             border: 1px solid #d0d0d0 !important;
             border-radius: 15px !important;
             padding: 10px 16px !important;
-            font-size: 16px !important;
+            font-size: 24px !important;
             color: #333333 !important;
             width: 100% !important;
             box-sizing: border-box !important;
@@ -216,11 +236,16 @@ try:
             max-height: calc(100vh - 140px) !important;
             overflow-y: auto !important;
             padding-bottom: 20px !important;
+        }}          /* Force chat message text to be black with differentiated sizing */
+        .stChatMessage div, .stChatMessage span {{
+            color: #000000 !important;
+            font-size: 30px !important;
         }}
         
-        /* Force chat message text to be black */
-        .stChatMessage p, .stChatMessage div, .stChatMessage span {{
+        /* Make paragraphs inside chat messages smaller */
+        .stChatMessage p {{
             color: #000000 !important;
+            font-size: 20px !important;
         }}
         </style>
         """,
@@ -229,7 +254,7 @@ try:
 except FileNotFoundError:
     st.warning("Background image not found. Using default background.")
 
-st.title("Lord of The Rings RAG Chat")
+st.title("Lord of The Rings Chat")
 
 # Initialize session state
 if "messages" not in st.session_state:
@@ -239,7 +264,7 @@ if "selected_characters" not in st.session_state:
 
 # Character selection
 if st.session_state.selected_characters is None:
-    st.subheader("Select Characters")
+    st.write("Select Characters")
     st.write("Available characters: Frodo, Gandalf, Legolas, Sam")
     chars = st.text_input("Enter 1 or 2 character names (comma separated):")
     if st.button("Start Chat") and chars:
