@@ -83,6 +83,17 @@ with st.sidebar:
             st.session_state.selected_characters = None
             st.rerun()
 
+# Prepare base64-encoded icons for inline embedding
+import base64 as _base64
+_icons = {name: f"icons/{name}.png" for name in ["frodo","gandalf","legolas","sam"]}
+_icon_b64 = {}
+for _name, _path in _icons.items():
+    try:
+        with open(_path, 'rb') as _f:
+            _icon_b64[_name] = _base64.b64encode(_f.read()).decode()
+    except FileNotFoundError:
+        _icon_b64[_name] = None
+
 # Character selection
 if st.session_state.selected_characters is None:
     st.markdown("<div style='text-align:center; margin:40px 0;'><h3>Select Characters</h3></div>", unsafe_allow_html=True)
@@ -93,11 +104,15 @@ if st.session_state.selected_characters is None:
     for col, name in zip(cols, chars):
         with col:
             checked = st.checkbox(labels[name], key=f"select_{name}")
-            # stylizowany obrazek z dynamicznym obramowaniem
+            # use base64 inline icon
+            if _icon_b64.get(name):
+                img_src = f"data:image/png;base64,{_icon_b64[name]}"
+            else:
+                img_src = f"icons/{name}.png"
             border = "3px solid #2c3e50" if checked else "1px solid transparent"
             st.markdown(
                 f"<div style='text-align:center;'>"
-                f"<img src='icons/{name}.png' width='60' style='border:{border};border-radius:8px;margin-bottom:4px;'/>"
+                f"<img src='{img_src}' width='60' style='border:{border};border-radius:8px;margin-bottom:4px;'/>"
                 f"</div>",
                 unsafe_allow_html=True
             )
