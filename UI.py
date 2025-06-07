@@ -85,50 +85,31 @@ with st.sidebar:
 
 # Character selection
 if st.session_state.selected_characters is None:
-    # Centered rectangular icon selection for characters
-    icons = {
-        "frodo": "icons/frodo.png",
-        "gandalf": "icons/gandalf.png",
-        "legolas": "icons/placeholder.png",
-        "sam": "icons/placeholder.png"
-    }
-    # Begin character selection header
-    st.markdown("""
-    <div id="char-selection" style="text-align:center; width:60%; margin:40px auto 10px;">
-        <h3>Select Characters</h3>
-    </div>
-    """, unsafe_allow_html=True)
-    # Create aligned columns for icons and checkboxes
-    col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
-    with col1:
-        st.image("icons/frodo.png", width=60)
-        st.checkbox("Frodo", key="select_frodo")
-    with col2:
-        st.image("icons/gandalf.png", width=60)
-        st.checkbox("Gandalf", key="select_gandalf")
-    with col3:
-        st.image("icons/placeholder.png", width=60)
-        st.checkbox("Legolas", key="select_legolas")
-    with col4:
-        st.image("icons/placeholder.png", width=60)
-        st.checkbox("Sam", key="select_sam")
+    st.markdown("<div style='text-align:center; margin:40px 0;'><h3>Select Characters</h3></div>", unsafe_allow_html=True)
+    cols = st.columns(4)
+    chars = ["frodo", "gandalf", "legolas", "sam"]
+    labels = {"frodo":"Frodo","gandalf":"Gandalf","legolas":"Legolas","sam":"Sam"}
+    selected = []
+    for col, name in zip(cols, chars):
+        with col:
+            checked = st.checkbox(labels[name], key=f"select_{name}")
+            # stylizowany obrazek z dynamicznym obramowaniem
+            border = "3px solid #2c3e50" if checked else "1px solid transparent"
+            st.markdown(
+                f"<div style='text-align:center;'>"
+                f"<img src='icons/{name}.png' width='60' style='border:{border};border-radius:8px;margin-bottom:4px;'/>"
+                f"</div>",
+                unsafe_allow_html=True
+            )
+            if checked:
+                selected.append(name)
     # Start chat button
-    if st.button("Start Chat", key="start_chat_btn"):
-        selected = []
-        if st.session_state.get("select_frodo"):
-            selected.append("frodo")
-        if st.session_state.get("select_gandalf"):
-            selected.append("gandalf")
-        if st.session_state.get("select_legolas"):
-            selected.append("legolas")
-        if st.session_state.get("select_sam"):
-            selected.append("sam")
-        if 1 <= len(selected) <= 2:
+    if len(selected) >= 1 and len(selected) <= 2:
+        if st.button("Start Chat"):
             st.session_state.selected_characters = selected
             st.rerun()
-        else:
-            st.error("Please select one or two characters before starting.")
-    # End character selection
+    else:
+        st.button("Start Chat", disabled=True)
 else:
     st.write(f"Chatting with: {', '.join(st.session_state.selected_characters).title()}")
 
