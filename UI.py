@@ -96,7 +96,7 @@ for _name, _path in _icons.items():
 
 # Character selection
 if st.session_state.selected_characters is None:
-    st.markdown("<div style='text-align:center; margin:40px 0;'><h3>Select Characters</h3></div>", unsafe_allow_html=True)
+    st.markdown("<div style='text-align:center; margin:20px 0;'><h3>Select Characters</h3></div>", unsafe_allow_html=True)
     # Ściśnij odstępy tekstu checkboxa i etykiet
     st.markdown(
         """
@@ -108,11 +108,11 @@ if st.session_state.selected_characters is None:
         unsafe_allow_html=True
     )
     # Dodajemy niewidoczny spacer na początku i na końcu listy
-    cols = st.columns(6, gap="small")
-    chars = ["spacer_start", "frodo", "gandalf", "legolas", "sam", "spacer_end"]
+    cols = st.columns(8, gap="medium")
+    chars = ["spacer_start_1", "spacer_start_2", "frodo", "gandalf", "legolas", "sam", "spacer_end_1", "spacer_end_2"]
     labels = {
         "frodo":"Frodo", "gandalf":"Gandalf", "legolas":"Legolas", "sam":"Sam",
-        "spacer_start":"", "spacer_end":""
+        "spacer_start_1":"", "spacer_end_1":"", "spacer_start_2":"", "spacer_end_2":""
     }
     selected = []
     for col, name in zip(cols, chars):
