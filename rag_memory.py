@@ -123,28 +123,38 @@ async def round_robin_chat():
     # await legolas_memory.add(MemoryContent(content="Legolas is an elf prince and a member of the Fellowship.", mime_type=MemoryMimeType.TEXT))
     # await gimli_memory.add(MemoryContent(content="Gimli is a dwarf warrior and values loyalty and bravery.", mime_type=MemoryMimeType.TEXT))
 
+    def load_prompt(character_name: str) -> str:
+        """Load system prompt for a character from prompts/{character_name}.txt"""
+        prompt_path = os.path.join(os.path.dirname(__file__), "prompts", f"{character_name.lower()}.txt")
+        try:
+            with open(prompt_path, "r", encoding="utf-8") as f:
+                return f.read()
+        except FileNotFoundError:
+            print(f"Prompt file not found for {character_name}, using default prompt.")
+            return f"You are {character_name} from Lord of The Rings"
+
     frodo = AssistantAgent(
         name="Frodo",
         model_client=az_model_client,
-        system_message="You are Frodo from Lord of The Rings",
+        system_message=load_prompt("Frodo"),
         memory=[frodo_memory]
     )
     gandalf = AssistantAgent(
         name="Gandalf",
         model_client=az_model_client,
-        system_message="You are Gandalf from Lord of The Rings",
+        system_message=load_prompt("Gandalf"),
         memory=[gandalf_memory]
     )
     legolas = AssistantAgent(
         name="Legolas",
         model_client=az_model_client,
-        system_message="You are Legolas from Lord of The Rings",
+        system_message=load_prompt("Legolas"),
         memory=[legolas_memory]
     )
     sam = AssistantAgent(
         name="Sam",
         model_client=az_model_client,
-        system_message="You are Sam from Lord of The Rings",
+        system_message=load_prompt("Sam"),
         memory=[sam_memory]
     )
     
