@@ -85,7 +85,7 @@ with st.sidebar:
 
 # Prepare base64-encoded icons for inline embedding
 import base64 as _base64
-_icons = {name: f"icons/{name}.png" for name in ["frodo","gandalf","legolas","sam"]}
+_icons = {name: f"icons/{name}.png" for name in ["frodo","gandalf","legolas","sam","user"]}
 _icon_b64 = {}
 for _name, _path in _icons.items():
     try:
@@ -379,7 +379,7 @@ icon_paths = {
     "gandalf": "icons/gandalf.png",
     "legolas": "icons/legolas.png",
     "sam": "icons/sam.png",
-    "You": "icons/placeholder.png"  # User icon
+    "You": "icons/user.png"  # User icon
 }
 
 # After run_chat is defined and before displaying chat history:
@@ -403,22 +403,18 @@ if st.session_state.current_session:
 # Display chat history with proper alignment
 for speaker, message in st.session_state.messages:
     if speaker == "You":
-        # Right-align user messages with icon on the left of the message
-        col1, col2, col3 = st.columns([1, 3, 1])
-        with col3:
-            # Create a container for right-aligned content
-            with st.container():
-                st.markdown(
-                    f"""
-                    <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 10px;">
-                        <div style="background-color: #ffffff; color: black; padding: 10px 15px; border-radius: 18px; max-width: 80%; text-align: right; margin-right: 10px; border: 1px solid #ddd;">
-                            {message}
-                        </div>
-                        <img src="icons/placeholder.png" style="width: 40px; height: 40px; border-radius: 50%;" />
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
+        # Right-align user messages with icon on the right
+        st.markdown(
+            f"""
+            <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 15px; width: 100%;">
+                <div style="background-color: rgba(255, 255, 255, 0.95); color: black; padding: 10px 15px; border-radius: 18px; max-width: 70%; text-align: right; margin-right: 10px; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+                    {message}
+                </div>
+                <img src="data:image/png;base64,{_icon_b64.get('user', '')}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0;" />
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
     else:
         # Left-align character messages (default)
         icon = icon_paths.get(speaker.lower(), "🧙‍♂️")
