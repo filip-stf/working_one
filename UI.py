@@ -139,6 +139,14 @@ if st.session_state.selected_characters is None:
     # Start chat button
     if len(selected) >= 1 and len(selected) <= 2:
         if st.button("Start Chat"):
+            # Create a new chat session, same as clicking 'New Chat'
+            new_name = f"Chat {len(st.session_state.chat_sessions) + 1}"
+            st.session_state.chat_sessions[new_name] = {
+                "messages": [],
+                "selected_characters": selected
+            }
+            st.session_state.current_session = new_name
+            st.session_state.messages = []
             st.session_state.selected_characters = selected
             st.rerun()
     else:
