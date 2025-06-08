@@ -377,8 +377,8 @@ except FileNotFoundError:
 icon_paths = {
     "frodo": "icons/frodo.png",
     "gandalf": "icons/gandalf.png",
-    "legolas": "icons/placeholder.png",
-    "sam": "icons/placeholder.png",
+    "legolas": "icons/legolas.png",
+    "sam": "icons/sam.png",
     "You": "icons/placeholder.png"  # User icon
 }
 
