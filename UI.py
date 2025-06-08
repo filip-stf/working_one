@@ -97,24 +97,42 @@ for _name, _path in _icons.items():
 # Character selection
 if st.session_state.selected_characters is None:
     st.markdown("<div style='text-align:center; margin:40px 0;'><h3>Select Characters</h3></div>", unsafe_allow_html=True)
-    cols = st.columns(4)
-    chars = ["frodo", "gandalf", "legolas", "sam"]
-    labels = {"frodo":"Frodo","gandalf":"Gandalf","legolas":"Legolas","sam":"Sam"}
+    # Ściśnij odstępy tekstu checkboxa i etykiet
+    st.markdown(
+        """
+        <style>
+        .stCheckbox {margin: 0 !important; padding: 0 !important;}
+        .stCheckbox label {margin: 0 !important; padding: 0 !important; line-height:1 !important;}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+    # Dodajemy niewidoczny spacer na początku i na końcu listy
+    cols = st.columns(6, gap="small")
+    chars = ["spacer_start", "frodo", "gandalf", "legolas", "sam", "spacer_end"]
+    labels = {
+        "frodo":"Frodo", "gandalf":"Gandalf", "legolas":"Legolas", "sam":"Sam",
+        "spacer_start":"", "spacer_end":""
+    }
     selected = []
     for col, name in zip(cols, chars):
         with col:
+            if name.startswith("spacer_"):
+                # invisible spacer at beginning or end
+                st.markdown(
+                    "<div style='visibility:hidden; width:80px; height:60px;'></div>",
+                    unsafe_allow_html=True
+                )
+                continue
             checked = st.checkbox(labels[name], key=f"select_{name}")
-            # use base64 inline icon
-            if _icon_b64.get(name):
-                img_src = f"data:image/png;base64,{_icon_b64[name]}"
-            else:
-                img_src = f"icons/{name}.png"
+            # base64 inline icon
+            img_src = (f"data:image/png;base64,{_icon_b64[name]}" if _icon_b64.get(name) else f"icons/{name}.png")
             border = "3px solid #2c3e50" if checked else "1px solid transparent"
+            # icon above checkbox label
             st.markdown(
                 f"<div style='text-align:center;'>"
-                f"<img src='{img_src}' width='60' style='border:{border};border-radius:8px;margin-bottom:4px;'/>"
-                f"</div>",
-                unsafe_allow_html=True
+                f"<img src='{img_src}' width='80' style='border:{border};border-radius:8px;margin-bottom:4px;'/>"
+                f"</div>", unsafe_allow_html=True
             )
             if checked:
                 selected.append(name)
